@@ -191,6 +191,7 @@ const mentionOpen = ref(false);
 const mentionQuery = ref('');
 const mentionRangeStart = ref(-1);
 const mentionRangeEnd = ref(-1);
+const mentionReplaceEnd = ref(-1);
 const activeIndex = ref(0);
 type ChatAttachment = ImageAttachment | TextAttachment;
 const attachments = ref<ChatAttachment[]>([]);
@@ -305,18 +306,21 @@ function closeMention() {
   mentionQuery.value = '';
   mentionRangeStart.value = -1;
   mentionRangeEnd.value = -1;
+  mentionReplaceEnd.value = -1;
   activeIndex.value = 0;
 }
 
-function setMentionState(start: number, end: number, query: string) {
+function setMentionState(start: number, end: number, replaceEnd: number, query: string) {
   const shouldReset =
     !mentionOpen.value ||
     mentionRangeStart.value !== start ||
     mentionRangeEnd.value !== end ||
+    mentionReplaceEnd.value !== replaceEnd ||
     mentionQuery.value !== query;
   mentionOpen.value = true;
   mentionRangeStart.value = start;
   mentionRangeEnd.value = end;
+  mentionReplaceEnd.value = replaceEnd;
   mentionQuery.value = query;
   if (shouldReset) {
     activeIndex.value = 0;
@@ -351,7 +355,7 @@ function updateMentionState() {
     return;
   }
   const query = inputValue.value.slice(atIndex + 1, caret);
-  setMentionState(atIndex, mentionEnd, query);
+  setMentionState(atIndex, mentionEnd, caret, query);
 }
 
 function selectMention(name: string) {
@@ -359,7 +363,7 @@ function selectMention(name: string) {
     return;
   }
   const start = mentionRangeStart.value;
-  const end = mentionRangeEnd.value;
+  const end = mentionReplaceEnd.value;
   if (start < 0 || end < start) {
     closeMention();
     return;
