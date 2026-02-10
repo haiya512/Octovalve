@@ -19,3 +19,5 @@ codex-app-server-protocol = { git = "https://github.com/openai/codex.git", packa
 codex-protocol = { git = "https://github.com/openai/codex.git", package = "codex-protocol", rev = "565488c15b8969694ec52cda3d6fcc99655a972f" }
 
 dirs = "5.0"
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.52", features = ["Win32_System_Threading"] }

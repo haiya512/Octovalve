@@ -13,6 +13,8 @@ use std::path::PathBuf;
 use std::sync::{Arc, Mutex as StdMutex};
 use tokio::process::Command as TokioCommand;
 use tokio::sync::Mutex;
+#[cfg(windows)]
+use windows_sys::Win32::System::Threading::CREATE_NO_WINDOW;
 
 use crate::services::logging::append_log_line;
 
@@ -184,7 +186,9 @@ impl McpClientState {
 
         let client = Arc::new(McpClient::start_with_spec(&spec).await?);
         let mut guard = self.registry.lock().await;
-        guard.clients.insert(server.to_string(), Arc::clone(&client));
+        guard
+            .clients
+            .insert(server.to_string(), Arc::clone(&client));
         Ok(client)
     }
 }
@@ -208,6 +212,8 @@ impl McpClient {
             },
         };
         let mut command = TokioCommand::new(&spec.command);
+        #[cfg(windows)]
+        command.creation_flags(CREATE_NO_WINDOW);
         command.args(&spec.args);
         if !spec.env.is_empty() {
             command.envs(&spec.env);

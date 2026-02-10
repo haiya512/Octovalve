@@ -32,6 +32,8 @@ use tokio::{
 
 use crate::cli::CliConfig;
 use crate::logging::{log_fmt, LogLevel};
+#[cfg(windows)]
+use windows_sys::Win32::System::Threading::CREATE_NO_WINDOW;
 
 // Prefer the user's local Codex CLI (`codex app-server`). We support overriding the executable
 // path via `CliConfig.codex_path` to avoid PATH issues when launching from a bundled app (DMG).
@@ -130,6 +132,8 @@ impl AppServerClient {
             .filter(|p| !p.is_empty())
             .unwrap_or(if cfg!(windows) { "codex.cmd" } else { "codex" });
         let mut cmd = Command::new(program);
+        #[cfg(windows)]
+        cmd.creation_flags(CREATE_NO_WINDOW);
         cmd.arg("app-server");
         cmd.args(&config.app_server_args);
         if let Some(home) = dirs::home_dir() {

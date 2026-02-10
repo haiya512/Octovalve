@@ -42,3 +42,5 @@ custom-protocol = ["tauri/custom-protocol"]
 objc2 = "0.6.3"
 objc2-app-kit = { version = "0.3.2", features = ["NSScrollView", "NSResponder", "NSView"] }
 objc2-web-kit = { version = "0.3.2", features = ["WKWebView"] }
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.52", features = ["Win32_System_Threading"] }
