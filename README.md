@@ -178,6 +178,7 @@ rustup target add aarch64-apple-darwin x86_64-apple-darwin
 npm run tauri:build:universal:dmg
 ```
 
+Windows NSIS notes: see `docs/windows-nsis-build.md`.
 Runtime notes:
 - On startup, the app automatically launches `console` (sidecar).
 - On first launch, it creates `~/.octovalve/local-proxy-config.toml.example`.
