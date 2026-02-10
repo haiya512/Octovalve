@@ -128,7 +128,7 @@ impl AppServerClient {
             .as_deref()
             .map(str::trim)
             .filter(|p| !p.is_empty())
-            .unwrap_or("codex");
+            .unwrap_or(if cfg!(windows) { "codex.cmd" } else { "codex" });
         let mut cmd = Command::new(program);
         cmd.arg("app-server");
         cmd.args(&config.app_server_args);

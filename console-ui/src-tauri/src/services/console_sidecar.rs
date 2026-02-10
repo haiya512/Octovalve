@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::fs;
 use std::fs::OpenOptions;
 use std::io::Write;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::{Duration, Instant};
 
@@ -292,12 +292,48 @@ pub fn restart_console_sidecar(
 }
 
 pub fn build_console_path() -> String {
-    let base = std::env::var("PATH").unwrap_or_default();
-    if base.is_empty() {
-        "/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin".to_string()
-    } else {
-        format!("/usr/local/bin:/opt/homebrew/bin:{base}")
+    let mut paths = Vec::<PathBuf>::new();
+
+    #[cfg(windows)]
+    {
+        if let Ok(app_data) = std::env::var("APPDATA") {
+            paths.push(PathBuf::from(app_data).join("npm"));
+        }
+        if let Ok(home) = std::env::var("USERPROFILE") {
+            paths.push(
+                PathBuf::from(home)
+                    .join(".octovalve")
+                    .join("npm")
+                    .join("global")
+                    .join("bin"),
+            );
+        }
     }
+
+    #[cfg(not(windows))]
+    {
+        paths.push(PathBuf::from("/usr/local/bin"));
+        paths.push(PathBuf::from("/opt/homebrew/bin"));
+    }
+
+    if let Some(base_path) = std::env::var_os("PATH") {
+        paths.extend(std::env::split_paths(&base_path));
+    }
+
+    if paths.is_empty() {
+        #[cfg(windows)]
+        {
+            return String::new();
+        }
+        #[cfg(not(windows))]
+        {
+            return "/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin".to_string();
+        }
+    }
+
+    std::env::join_paths(paths)
+        .map(|value| value.to_string_lossy().to_string())
+        .unwrap_or_else(|_| std::env::var("PATH").unwrap_or_default())
 }
 
 fn resolve_app_language(app: &AppHandle) -> String {
@@ -316,3 +352,4 @@ fn resolve_default_locale(language: &str) -> Option<String> {
         _ => None,
     }
 }
+
