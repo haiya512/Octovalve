@@ -352,7 +352,7 @@ function ensureLogTerminal() {
     disableStdin: true,
     convertEol: true,
     fontSize: resolveLogFontSize(),
-    fontFamily: 'Menlo, Monaco, "Courier New", monospace',
+    fontFamily: '"Cascadia Mono", "Cascadia Code", Consolas, "Liberation Mono", "DejaVu Sans Mono", "SFMono-Regular", Menlo, Monaco, monospace',
     theme: resolveLogTheme(),
     scrollback: 2000,
   });

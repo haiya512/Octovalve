@@ -185,7 +185,7 @@ async function openSession() {
   terminal = new Terminal({
     cursorBlink: true,
     fontSize: resolveTerminalFontSize(),
-    fontFamily: 'Menlo, Monaco, "Courier New", monospace',
+    fontFamily: '"Cascadia Mono", "Cascadia Code", Consolas, "Liberation Mono", "DejaVu Sans Mono", "SFMono-Regular", Menlo, Monaco, monospace',
     theme: resolveTerminalTheme(props.theme),
     scrollback: 5000,
   });

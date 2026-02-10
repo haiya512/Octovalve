@@ -525,7 +525,7 @@ function ensureSwitchLogTerminal() {
     disableStdin: true,
     convertEol: true,
     fontSize: resolveSwitchLogFontSize(),
-    fontFamily: 'Menlo, Monaco, \"Courier New\", monospace',
+    fontFamily: '"Cascadia Mono", "Cascadia Code", Consolas, "Liberation Mono", "DejaVu Sans Mono", "SFMono-Regular", Menlo, Monaco, monospace',
     theme: resolveSwitchLogTheme(),
     scrollback: 2000,
   });

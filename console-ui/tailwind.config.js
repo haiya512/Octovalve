@@ -5,7 +5,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+        mono: ['Cascadia Mono', 'Cascadia Code', 'Consolas', 'Liberation Mono', 'DejaVu Sans Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Microsoft YaHei UI', 'sans-serif'],
       },
       colors: {
         surface: 'rgb(var(--color-bg) / <alpha-value>)',
