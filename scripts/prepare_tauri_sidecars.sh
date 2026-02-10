@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+﻿#!/usr/bin/env bash
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -87,7 +87,7 @@ build_sidecars_for_target() {
   fi
 
   local suffix="-${target_triple}"
-  for bin in octovalve-console octovalve-proxy; do
+  for bin in octovalve-console octovalve-proxy octovalve-ssh-askpass; do
     local src="${src_dir}/${bin}${EXT}"
     local dst="${BIN_DIR}/${bin}${suffix}${EXT}"
     if [[ ! -f "${src}" ]]; then
@@ -112,7 +112,7 @@ if [[ "${TARGET_TRIPLE}" == "universal-apple-darwin" ]]; then
     build_sidecars_for_target "${arch_target}" "true"
   done
 
-  for bin in octovalve-console octovalve-proxy; do
+  for bin in octovalve-console octovalve-proxy octovalve-ssh-askpass; do
     src_arm="${TARGET_DIR}/aarch64-apple-darwin/release/${bin}${EXT}"
     src_x86="${TARGET_DIR}/x86_64-apple-darwin/release/${bin}${EXT}"
     dst="${BIN_DIR}/${bin}-universal-apple-darwin"
@@ -134,3 +134,4 @@ if [[ "${TARGET_TRIPLE}" == "universal-apple-darwin" ]]; then
 fi
 
 build_sidecars_for_target "${TARGET_TRIPLE}"
+

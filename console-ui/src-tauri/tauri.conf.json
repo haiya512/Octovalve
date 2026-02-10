@@ -1,4 +1,4 @@
-{
+﻿{
   "productName": "Octovalve",
   "version": "0.1.4",
   "identifier": "com.octovalve.console",
@@ -80,7 +80,8 @@
     "active": false,
     "externalBin": [
       "../../target/release/octovalve-console",
-      "../../target/release/octovalve-proxy"
+      "../../target/release/octovalve-proxy",
+      "../../target/release/octovalve-ssh-askpass"
     ],
     "icon": [
       "icons/icon.icns",
@@ -88,3 +89,5 @@
     ]
   }
 }
+
+
