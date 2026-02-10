@@ -416,7 +416,8 @@ fn wrap_command_with_pidfile(command: &str, request_id: &str) -> String {
     let inner = format!("bash --noprofile -lc {}", shell_escape(command));
     format!(
         "mkdir -p \"$HOME/.octovalve/run\"; pidfile=\"{pidfile}\"; rm -f \"$pidfile\"; \
-setsid {inner} & pid=$!; echo $pid > \"$pidfile\"; wait $pid; status=$?; \
+if command -v setsid >/dev/null 2>&1; then setsid {inner} & else {inner} & fi; \
+pid=$!; echo $pid > \"$pidfile\"; wait $pid; status=$?; \
 rm -f \"$pidfile\"; exit $status"
     )
 }
@@ -444,8 +445,9 @@ fn build_force_kill_command(request_id: &str) -> String {
     let script = format!(
         "pidfile=\"{pidfile}\"; if [ -f \"$pidfile\" ]; then \
 pid=$(cat \"$pidfile\" 2>/dev/null || true); \
-if [ -n \"$pid\" ]; then kill -TERM -- -\"$pid\" 2>/dev/null || true; sleep 2; \
-kill -KILL -- -\"$pid\" 2>/dev/null || true; fi; \
+if [ -n \"$pid\" ]; then \
+kill -TERM -- -\"$pid\" 2>/dev/null || kill -TERM \"$pid\" 2>/dev/null || true; sleep 2; \
+kill -KILL -- -\"$pid\" 2>/dev/null || kill -KILL \"$pid\" 2>/dev/null || true; fi; \
 rm -f \"$pidfile\" 2>/dev/null || true; fi"
     );
     format!("bash --noprofile -lc {}", shell_escape(&script))
@@ -741,12 +743,35 @@ impl PtySession {
 }
 
 fn resolve_control_path(target: &TargetSpec) -> Option<PathBuf> {
+    if !control_master_enabled() {
+        return None;
+    }
     let ssh = target.ssh.as_deref()?.trim();
     if ssh.is_empty() {
         return None;
     }
     let control_dir = resolve_control_dir()?;
     Some(control_path_for_target(&control_dir, target, ssh))
+}
+
+fn control_master_enabled() -> bool {
+    if let Some(enabled) = env_flag("OCTOVALVE_SSH_CONTROL_MASTER") {
+        return enabled;
+    }
+    !cfg!(windows)
+}
+
+fn env_flag(key: &str) -> Option<bool> {
+    let value = std::env::var(key).ok()?;
+    let normalized = value.trim().to_ascii_lowercase();
+    match normalized.as_str() {
+        "1" | "true" | "yes" | "on" => Some(true),
+        "0" | "false" | "no" | "off" => Some(false),
+        _ => {
+            warn!(key, value = %value, "invalid boolean env value");
+            None
+        }
+    }
 }
 
 fn resolve_control_dir() -> Option<PathBuf> {
@@ -1055,6 +1080,48 @@ mod tests {
             .any(|arg| arg == "ControlPath=/tmp/ssh-control/cm-test"));
     }
 
+    #[test]
+    fn control_master_enabled_defaults_by_platform() {
+        if cfg!(windows) {
+            assert!(!control_master_enabled());
+        } else {
+            assert!(control_master_enabled());
+        }
+    }
+
+    #[test]
+    fn control_master_enabled_respects_env_override() {
+        let _guard = env_lock().lock().unwrap();
+        let backup = std::env::var("OCTOVALVE_SSH_CONTROL_MASTER").ok();
+
+        std::env::set_var("OCTOVALVE_SSH_CONTROL_MASTER", "0");
+        assert!(!control_master_enabled());
+
+        std::env::set_var("OCTOVALVE_SSH_CONTROL_MASTER", "1");
+        assert!(control_master_enabled());
+
+        if let Some(value) = backup {
+            std::env::set_var("OCTOVALVE_SSH_CONTROL_MASTER", value);
+        } else {
+            std::env::remove_var("OCTOVALVE_SSH_CONTROL_MASTER");
+        }
+    }
+
+    #[test]
+    fn wrap_command_uses_setsid_fallback() {
+        let cmd = wrap_command_with_pidfile("echo ok", "req");
+        assert!(cmd.contains("command -v setsid"));
+        assert!(cmd.contains("then setsid"));
+    }
+
+    #[test]
+    fn force_kill_command_falls_back_to_pid() {
+        let cmd = build_force_kill_command("req");
+        assert!(cmd.contains("kill -TERM -- -\"$pid\""));
+        assert!(cmd.contains("kill -TERM \"$pid\""));
+        assert!(cmd.contains("kill -KILL -- -\"$pid\""));
+        assert!(cmd.contains("kill -KILL \"$pid\""));
+    }
     #[test]
     fn build_remote_command_disables_profiles() {
         let target = sample_target();
