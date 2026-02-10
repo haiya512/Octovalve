@@ -35,10 +35,12 @@ fn signal_child(_child: &mut tokio::process::Child, _signal: i32) {}
 pub(super) async fn terminate_child(
     child: &mut tokio::process::Child,
 ) -> Option<std::process::ExitStatus> {
+    #[cfg(unix)]
     signal_child(child, libc::SIGINT);
     match tokio::time::timeout(CANCEL_GRACE, child.wait()).await {
         Ok(status) => return status.ok(),
         Err(_) => {
+            #[cfg(unix)]
             signal_child(child, libc::SIGKILL);
             let _ = child.kill().await;
             match tokio::time::timeout(CANCEL_GRACE, child.wait()).await {

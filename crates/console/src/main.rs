@@ -166,7 +166,7 @@ fn is_parent_alive(parent_pid: u32) -> bool {
         let mut exit_code: u32 = 0;
         let ok = GetExitCodeProcess(handle, &mut exit_code);
         CloseHandle(handle);
-        ok != 0 && exit_code == STILL_ACTIVE
+        ok != 0 && exit_code == STILL_ACTIVE as u32
     }
 }
 

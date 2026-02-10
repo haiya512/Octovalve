@@ -14,7 +14,7 @@ pub fn handle(window: &Window, event: &WindowEvent) {
     #[cfg(not(target_os = "macos"))]
     if let WindowEvent::CloseRequested { api, .. } = event {
         api.prevent_close();
-        let app_handle = window.app_handle();
+        let app_handle = window.app_handle().clone();
         tauri::async_runtime::spawn_blocking(move || {
             stop_console(&app_handle);
             app_handle.exit(0);
