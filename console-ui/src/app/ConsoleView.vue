@@ -38,7 +38,7 @@ import SettingsModal from '../ui/components/SettingsModal.vue';
 import NotificationBridge from '../ui/components/NotificationBridge.vue';
 import { loadSettings, saveSettings } from '../services/settings';
 import { applyUiScale } from '../services/uiScale';
-import { getWindowLogicalSize, setWindowMinSize, setWindowSize } from '../services/tauriWindow';
+import { getWindowLogicalSize, isWindowMaximized, setWindowMinSize, setWindowSize } from '../services/tauriWindow';
 import { formatErrorForUser, normalizeError } from '../services/errors';
 import { IS_MAC_PLATFORM_KEY } from '../shared/platform';
 import type { AppLanguage, AppSettings, ConsoleEvent, ProfileSummary, ServiceSnapshot, TargetInfo } from '../shared/types';
@@ -125,6 +125,8 @@ const effectiveTerminalScale = computed(
 );
 const DRAG_REGION_BASE_PX = 28;
 const isMacPlatform = inject<boolean>(IS_MAC_PLATFORM_KEY, false);
+const isWindowsPlatform = typeof navigator !== 'undefined'
+  && /win/i.test((navigator as { userAgentData?: { platform?: string } }).userAgentData?.platform || navigator.platform || '');
 const dragRegionHeight = computed(() => {
   if (!isMacPlatform) {
     return '0px';
@@ -182,9 +184,6 @@ function clampChatWidth(value: number) {
 
 const layoutSizing = computed(() => {
   const chatOpen = isChatOpen.value;
-  const scale = Number.isFinite(effectiveUiScale.value) && effectiveUiScale.value > 0
-    ? effectiveUiScale.value
-    : 1;
   const mainMin = TARGET_MIN_MAIN_WIDTH;
   const minChat = chatOpen ? CHAT_MIN_WIDTH : 0;
   const desiredChat = chatOpen ? clampChatWidth(chatDesiredWidth.value) : 0;
@@ -215,8 +214,8 @@ const layoutSizing = computed(() => {
   return {
     sidebarWidth: Math.max(minSidebar, Math.min(baseSidebar, sidebarWidth)),
     chatMaxWidth: Math.max(minChat, chatMaxWidth),
-    minWindowWidth: (mainMin + minSidebar + minChat) * scale,
-    minWindowHeight: WINDOW_MIN_HEIGHT * scale,
+    minWindowWidth: mainMin + minSidebar + minChat,
+    minWindowHeight: WINDOW_MIN_HEIGHT,
   };
 });
 
@@ -228,25 +227,48 @@ async function syncWindowMinSize() {
   }
   const minWidth = layoutSizing.value.minWindowWidth;
   const minHeight = layoutSizing.value.minWindowHeight;
+  const chatOpen = isChatOpen.value;
+  void logUiEvent(`[window_sync] start min=${minWidth}x${minHeight} chatOpen=${chatOpen}`);
+
+  const maximizedBeforeSetMin = await isWindowMaximized();
+  if (isWindowsPlatform && maximizedBeforeSetMin) {
+    void logUiEvent('[window_sync] skip_set_min_while_maximized windows=true');
+    return;
+  }
+
   await setWindowMinSize(minWidth, minHeight);
+
+  const maximized = await isWindowMaximized();
+  void logUiEvent(`[window_sync] after_set_min maximized=${maximized}`);
+
+  // Avoid forcing a resize while maximized; it can trigger a restore on Windows.
+  if (maximized) {
+    return;
+  }
+
   const logicalSize = await getWindowLogicalSize();
   if (!logicalSize) {
     return;
   }
   const nextWidth = Math.max(logicalSize.width, minWidth);
   const nextHeight = Math.max(logicalSize.height, minHeight);
+  void logUiEvent(
+    `[window_sync] size logical=${logicalSize.width}x${logicalSize.height} next=${nextWidth}x${nextHeight}`
+  );
   if (nextWidth !== logicalSize.width || nextHeight !== logicalSize.height) {
+    void logUiEvent('[window_sync] apply_set_size');
     await setWindowSize(nextWidth, nextHeight);
   }
 }
-
 watch(
-  () => [layoutSizing.value.minWindowWidth, layoutSizing.value.minWindowHeight],
+  [
+    () => layoutSizing.value.minWindowWidth,
+    () => layoutSizing.value.minWindowHeight,
+  ],
   () => {
     void syncWindowMinSize();
   }
 );
-
 function handleChatWidthChange(width: number) {
   chatDesiredWidth.value = width;
 }

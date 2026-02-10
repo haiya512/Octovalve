@@ -1,0 +1,19 @@
+{
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Octovalve",
+        "width": 1280,
+        "height": 800,
+        "minWidth": 1,
+        "minHeight": 1,
+        "transparent": false,
+        "titleBarStyle": "Visible",
+        "hiddenTitle": false,
+        "dragDropEnabled": false,
+        "devtools": true
+      }
+    ]
+  }
+}

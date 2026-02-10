@@ -28,6 +28,13 @@ export async function setWindowSize(width: number, height: number) {
   await getCurrentWindow().setSize(new LogicalSize(clampedWidth, clampedHeight));
 }
 
+export async function isWindowMaximized() {
+  if (!TAURI_AVAILABLE) {
+    return false;
+  }
+  return getCurrentWindow().isMaximized();
+}
+
 export async function getWindowLogicalSize() {
   if (!TAURI_AVAILABLE) {
     return null;
@@ -43,3 +50,4 @@ export async function getWindowLogicalSize() {
     height: size.height / scale,
   };
 }
+
