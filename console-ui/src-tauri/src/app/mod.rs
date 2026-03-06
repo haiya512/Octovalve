@@ -46,6 +46,8 @@ pub fn run() {
             crate::commands::console::proxy_list_target_dirs,
             crate::commands::console::proxy_start_upload,
             crate::commands::console::proxy_upload_status,
+            crate::commands::console::proxy_get_aggressive_mode,
+            crate::commands::console::proxy_set_aggressive_mode,
             crate::commands::console::read_console_log,
             crate::commands::console::read_app_log,
             crate::commands::ai::ai_risk_assess,

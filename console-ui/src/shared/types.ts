@@ -98,7 +98,7 @@ export interface UploadStatus {
   error?: string | null;
 }
 
-export type CommandMode = 'shell';
+export type CommandMode = 'shell' | 'powershell';
 export type CommandStatus = 'approved' | 'denied' | 'error' | 'cancelled' | 'completed';
 
 export interface CommandStage {
@@ -109,6 +109,8 @@ export interface RequestSnapshot {
   id: string;
   client: string;
   target: string;
+  target_host?: string | null;
+  target_desc?: string | null;
   peer: string;
   intent: string;
   mode: CommandMode;
@@ -124,6 +126,8 @@ export interface RunningSnapshot {
   id: string;
   client: string;
   target: string;
+  target_host?: string | null;
+  target_desc?: string | null;
   peer: string;
   intent: string;
   mode: CommandMode;
@@ -143,6 +147,9 @@ export interface ResultSnapshot {
   exit_code?: number | null;
   error?: string | null;
   intent: string;
+  target?: string | null;
+  target_host?: string | null;
+  target_desc?: string | null;
   mode: CommandMode;
   raw_command: string;
   pipeline: CommandStage[];
