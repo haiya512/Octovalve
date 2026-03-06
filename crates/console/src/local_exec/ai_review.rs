@@ -84,7 +84,10 @@ impl AiReadonlyReviewer {
         &self.endpoint
     }
 
-    pub(crate) async fn review(&self, request: &CommandRequest) -> anyhow::Result<AiReadonlyDecision> {
+    pub(crate) async fn review(
+        &self,
+        request: &CommandRequest,
+    ) -> anyhow::Result<AiReadonlyDecision> {
         let payload = json!({
             "model": self.model,
             "temperature": 0,
@@ -114,7 +117,11 @@ impl AiReadonlyReviewer {
         let status = response.status();
         let body = response.text().await.unwrap_or_default();
         if !status.is_success() {
-            anyhow::bail!("ai readonly review http {}: {}", status, clip_text(&body, 300));
+            anyhow::bail!(
+                "ai readonly review http {}: {}",
+                status,
+                clip_text(&body, 300)
+            );
         }
 
         let parsed: ChatCompletionResponse =

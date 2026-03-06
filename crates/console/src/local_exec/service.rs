@@ -52,10 +52,7 @@ pub(super) fn spawn_service(
     } else {
         None
     };
-    let target_host = target
-        .ssh
-        .as_deref()
-        .and_then(extract_target_host);
+    let target_host = target.ssh.as_deref().and_then(extract_target_host);
     let target_desc = if target.desc.trim().is_empty() {
         None
     } else {

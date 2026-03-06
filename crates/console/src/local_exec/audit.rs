@@ -72,7 +72,8 @@ impl RequestRecord {
 }
 
 pub(crate) fn spawn_write_request_record(output_dir: Arc<PathBuf>, pending: &PendingRequest) {
-    let mut record = RequestRecord::from_request(&pending.request, &pending.peer, pending.received_at);
+    let mut record =
+        RequestRecord::from_request(&pending.request, &pending.peer, pending.received_at);
     record.target_host = pending.target_host.clone();
     record.target_desc = pending.target_desc.clone();
     record.aggressive_mode = pending.aggressive_mode;

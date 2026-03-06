@@ -431,9 +431,8 @@ mod tests {
 
     #[test]
     fn parse_powershell_command() {
-        let pipeline =
-            parse_pipeline(CommandMode::PowerShell, "Get-ChildItem | Select-String foo")
-                .expect("parse");
+        let pipeline = parse_pipeline(CommandMode::PowerShell, "Get-ChildItem | Select-String foo")
+            .expect("parse");
         assert_eq!(pipeline.len(), 2);
         assert_eq!(pipeline[0].argv[0], "Get-ChildItem");
         assert_eq!(pipeline[1].argv[0], "Select-String");

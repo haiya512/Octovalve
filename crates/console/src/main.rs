@@ -33,8 +33,8 @@ use axum::{Json, Router};
 use clap::Parser;
 use serde::Deserialize;
 use std::collections::HashSet;
-use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 use system_utils::path::expand_tilde;
 use tokio::net::TcpListener;
 use tokio::sync::broadcast;
@@ -95,7 +95,10 @@ async fn main() -> anyhow::Result<()> {
         .route("/targets/:name/dirs", get(list_target_dirs))
         .route("/targets/:name/upload", post(start_upload))
         .route("/uploads/:id", get(get_upload_status))
-        .route("/policy/aggressive", get(get_aggressive_mode).post(set_aggressive_mode))
+        .route(
+            "/policy/aggressive",
+            get(get_aggressive_mode).post(set_aggressive_mode),
+        )
         .route("/targets/:name/terminal", get(terminal_ws_handler))
         .route("/ws", get(ws_handler))
         .with_state(app_state)
@@ -467,10 +470,7 @@ async fn set_aggressive_mode(
             state
                 .aggressive_mode
                 .store(payload.enabled, Ordering::Relaxed);
-            tracing::warn!(
-                enabled = payload.enabled,
-                "aggressive mode toggled"
-            );
+            tracing::warn!(enabled = payload.enabled, "aggressive mode toggled");
         }
     }
     Ok(Json(AggressiveModeResponse {

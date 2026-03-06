@@ -18,8 +18,8 @@ use std::collections::HashSet;
 use std::net::SocketAddr;
 use std::path::{Path, PathBuf};
 use std::process::Stdio;
-use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
+use std::sync::Arc;
 
 use tokio::process::Command;
 use tokio::sync::broadcast;
@@ -48,7 +48,8 @@ pub(crate) async fn spawn_local_exec(
     let auto_approve_allowed = policy.auto_approve_allowed;
     let whitelist = Arc::new(Whitelist::from_config(&policy.whitelist)?);
     let limits = Arc::new(policy.limits);
-    let ai_readonly_reviewer = Arc::new(AiReadonlyReviewer::from_config(&policy.ai_readonly_review)?);
+    let ai_readonly_reviewer =
+        Arc::new(AiReadonlyReviewer::from_config(&policy.ai_readonly_review)?);
     let audit_root = Arc::new(audit_root);
     std::fs::create_dir_all(&*audit_root)?;
 

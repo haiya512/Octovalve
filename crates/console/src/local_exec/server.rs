@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::net::SocketAddr;
-use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 use std::time::{Duration, Instant, SystemTime};
 
 use anyhow::Context;
@@ -155,8 +155,10 @@ async fn handle_connection(
                 let received_at = SystemTime::now();
                 let record = RequestRecord::from_request(&request, &addr.to_string(), received_at);
                 spawn_write_request_record_value(Arc::clone(&output_dir), record);
-                let response =
-                    CommandResponse::denied(request.id.clone(), format!("denied by policy: {message}"));
+                let response = CommandResponse::denied(
+                    request.id.clone(),
+                    format!("denied by policy: {message}"),
+                );
                 spawn_write_result_record(
                     Arc::clone(&output_dir),
                     response.clone(),

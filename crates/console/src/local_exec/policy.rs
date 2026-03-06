@@ -252,8 +252,8 @@ impl Whitelist {
                 .map(String::as_str)
                 .filter_map(command_basename)
                 .any(|token| {
-                self.find_pipe_manual_review_tokens
-                    .contains(&token.to_ascii_lowercase())
+                    self.find_pipe_manual_review_tokens
+                        .contains(&token.to_ascii_lowercase())
                 })
         });
         if !has_risky_token {
