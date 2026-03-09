@@ -225,6 +225,22 @@ export interface ChatProviderConfig {
   };
 }
 
+export type ChatProviderCheckStatus = 'pass' | 'warn' | 'fail' | 'skip';
+
+export interface ChatProviderCheckItem {
+  key: string;
+  label: string;
+  status: ChatProviderCheckStatus;
+  detail: string;
+  suggestion?: string;
+}
+
+export interface ChatProviderCheckResult {
+  ok: boolean;
+  checkedAt: number;
+  items: ChatProviderCheckItem[];
+}
+
 export interface AppSettings {
   notificationsEnabled: boolean;
   theme: ThemeMode;

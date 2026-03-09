@@ -57,6 +57,7 @@ pub fn run() {
             crate::commands::terminal::terminal_resize,
             crate::commands::terminal::terminal_close,
             crate::commands::chat::read_text_file,
+            crate::commands::chat::run_chat_provider_checks,
             crate::commands::acp::acp_start,
             crate::commands::acp::acp_authenticate,
             crate::commands::acp::acp_new_session,

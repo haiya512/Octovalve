@@ -4,6 +4,8 @@ import { i18n } from '../i18n';
 import type {
   AiRiskApiResponse,
   BrokerConfigEditor,
+  ChatProviderCheckResult,
+  ChatProviderConfig,
   ConfigFilePayload,
   ConsoleEvent,
   AppLanguage,
@@ -435,6 +437,24 @@ export async function validateStartupConfig(): Promise<StartupCheckResult> {
     return { ok: true, needs_setup: false, errors: [], proxy_path: '', broker_path: '' };
   }
   return invoke<StartupCheckResult>('validate_startup_config');
+}
+
+export async function runChatProviderChecks(config: ChatProviderConfig): Promise<ChatProviderCheckResult> {
+  if (!TAURI_AVAILABLE) {
+    return {
+      ok: true,
+      checkedAt: Date.now(),
+      items: [
+        {
+          key: 'tauri-only',
+          label: 'Tauri only',
+          status: 'skip',
+          detail: 'Config self-check is only available in the desktop app.',
+        },
+      ],
+    };
+  }
+  return invoke<ChatProviderCheckResult>('run_chat_provider_checks', { input: config });
 }
 
 export async function readConsoleLog(offset: number, maxBytes: number): Promise<ConsoleLogChunk> {
